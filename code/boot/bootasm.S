@@ -27,9 +27,12 @@ start:
     # b 1byte w 2byte l 4byte q 8byte
 	# ah 8-15 al 0-7 
 	# ax,bx,cx,dx 是通用16位寄存器，为了兼容上代8位寄存器，分别分为ah,al;bh,bl;ch,cl;dh, dl
-	# ds, es, ss, 
+	# cs, ds, es, ss 都是段寄存器，存储的都是要指定的一段开始的内存单元地址 
 	# xorw 两个字节的ax 寄存器值自己进行异或
 	# movw 把ds寄存器的数值拷贝到ax寄存器
+	# ss sp 任何时候ss:sp 都指向栈顶元素
+	# 
+	# 这个设置好像没啥用啊？不都是由后边赋值给前边吗，这个操作好像没什么用处
     # Set up the important data segment registers (DS, ES, SS).
     xorw %ax, %ax                                   # Segment number zero
     movw %ax, %ds                                   # -> Data Segment
@@ -37,6 +40,7 @@ start:
     movw %ax, %ss                                   # -> Stack Segment
 
     # Enable A20:
+	# 只有jmp才能修改cs和ip中的数值，mov不能修改段寄存器和指令寄存器的数值
     #  For backwards compatibility with the earliest PCs, physical
     #  address line 20 is tied low, so that addresses higher than
     #  1MB wrap around to zero by default. This code undoes this.
