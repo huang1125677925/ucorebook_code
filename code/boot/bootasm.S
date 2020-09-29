@@ -4,7 +4,15 @@
 # The BIOS loads this code from the first sector of the hard disk into
 # memory at physical address 0x7c00 and starts executing in real mode
 # with %cs=0 %ip=7c00.
-
+#.set 伪指令
+#.code16 下边的代码用16位模式运行
+#.code32 下边的代码用32位模式运行
+#.global关键字用来让一个符号对链接器可见，可以供其他链接对象模块使用。
+#.global _start 让_start符号成为可见的标示符，这样链接器就知道跳转到程序中的什么地方并开始执行。linux寻找这个 _start标签作为程序的默认进入点。
+#
+#在汇编和C混合编程中，在GNU ARM编译环境下，汇编程序中要使用.global伪操作声明汇编程序为全局的函数，意即可被外部函数调用，同时C程序中要使用extern声明要调用的汇编语言程序。
+#
+#.extern XXXX 说明xxxx为外部函数，调用的时候可以遍访所有文件找到该函数并且使用它。
 .set PROT_MODE_CSEG,        0x8                     # kernel code segment selector
 .set PROT_MODE_DSEG,        0x10                    # kernel data segment selector
 .set CR0_PE_ON,             0x1                     # protected mode enable flag
@@ -15,7 +23,13 @@ start:
 .code16                                             # Assemble for 16-bit mode
     cli                                             # Disable interrupts
     cld                                             # String operations increment
-
+    
+    # b 1byte w 2byte l 4byte q 8byte
+	# ah 8-15 al 0-7 
+	# ax,bx,cx,dx 是通用16位寄存器，为了兼容上代8位寄存器，分别分为ah,al;bh,bl;ch,cl;dh, dl
+	# ds, es, ss, 
+	# xorw 两个字节的ax 寄存器值自己进行异或
+	# movw 把ds寄存器的数值拷贝到ax寄存器
     # Set up the important data segment registers (DS, ES, SS).
     xorw %ax, %ax                                   # Segment number zero
     movw %ax, %ds                                   # -> Data Segment
@@ -54,7 +68,7 @@ seta20.2:
     # Jump to next instruction, but in 32-bit code segment.
     # Switches processor into 32-bit mode.
     ljmp $PROT_MODE_CSEG, $protcseg
-
+#call 
 .code32                                             # Assemble for 32-bit mode
 protcseg:
     # Set up the protected-mode data segment registers
