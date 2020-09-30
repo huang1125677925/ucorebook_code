@@ -37,27 +37,6 @@
 
 static uint16_t *crt = (uint16_t *) 0xB8000;            // CGA memory
 
-/* stupid I/O delay routine necessitated by historical PC design flaws */
-static void
-delay(void) {
-    inb(0x84);
-    inb(0x84);
-    inb(0x84);
-    inb(0x84);
-}
-
-/* lpt_putc - copy console output to parallel port */
-static void
-lpt_putc(int c) {
-    int i;
-    for (i = 0; !(inb(LPTPORT + 1) & 0x80) && i < 12800; i ++) {
-        delay();
-    }
-    outb(LPTPORT + 0, c);
-    outb(LPTPORT + 2, 0x08 | 0x04 | 0x01);
-    outb(LPTPORT + 2, 0x08);
-}
-
 /* cga_putc - print character to console */
 static void
 cga_putc(int c) {
@@ -134,7 +113,6 @@ readseg(uintptr_t va, uint32_t count, uint32_t offset) {
 /* cons_puts - print a string to console */
 static void
 cons_putc(int c) {
-    lpt_putc(c);
     cga_putc(c);
 }
 
